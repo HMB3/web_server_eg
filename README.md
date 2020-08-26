@@ -24,3 +24,9 @@ If you are on Ubuntu, you can install this code as a service with an init script
 ```
 sudo service server start
 ```
+
+You also need to install python 3, and these packages : 
+http.server,
+http,
+json
+time
