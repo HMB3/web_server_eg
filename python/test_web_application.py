@@ -7,6 +7,8 @@ Created on Fri Aug 28 14:06:37 2020
 
 ## 1). Import Libraries
 from flask import Flask
+import sqlite3
+from sqlite3 import Error
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow_jsonapi.flask import Schema
 from marshmallow_jsonapi import fields
@@ -14,14 +16,34 @@ from flask_rest_jsonapi import Api, ResourceDetail, ResourceList
 from marshmallow_jsonapi.flask import Relationship
 from flask_rest_jsonapi import ResourceRelationship
 
-## 2). Create a new Flask application
+# Create a new Flask application
 app = Flask(__name__)
 
-## Set up SQLAlchemy
+
+
+## 2). Create the SQL database
+def create_connection(db_file):
+    """ create a database connection to a SQLite database """
+    conn = None
+    try:
+        conn = sqlite3.connect(db_file)
+        print(sqlite3.version)
+    except Error as e:
+        print(e)
+    finally:
+        if conn:
+            conn.close()
+
+
+if __name__ == '__main__':
+    create_connection(r"D:\web_server_eg\data\artists.db")
+
+
+## 3). Set up SQLAlchemy
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////artists.db'
 db = SQLAlchemy(app)
 
-## Define a class for the Artist table
+# Define a class for the Artist table
 class Artist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -32,7 +54,7 @@ class Artist(db.Model):
 db.create_all()
 
 
-## Create data abstraction 
+## 4). Create data abstractions 
 class ArtistSchema(Schema):
     class Meta:
         type_ = 'artist'
@@ -62,7 +84,7 @@ class ArtworkSchema(Schema):
     title = fields.Str(required=True)
     artist_id = fields.Integer(required=True)
     
-# Define the Artwork table
+## Define the Artwork table
 class Artwork(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String)
@@ -98,7 +120,7 @@ class ArtistOne(ResourceDetail):
     data_layer = {'session': db.session,
                   'model': Artist}   
     
-# Create endpoints    
+## 5). Create endpoints    
 api = Api(app)
 api.route(ArtistMany,    'artist_many',  '/artists')
 api.route(ArtistOne,     'artist_one',   '/artists/<int:id>')
