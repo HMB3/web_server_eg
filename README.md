@@ -1,5 +1,13 @@
-This script creates an mock API that allows client-side interaction with an 
+This puthon script creates an mock API that allows client-side interaction with an 
 underlying database (adapted from https://www.freecodecamp.org/news/build-a-simple-json-api-in-python/).
+
+Here's an overview of the steps involved:
+
+1). Define a database using Flask-SQLAlchemy
+2). Create a data abstraction with Marshmallow-JSONAPI
+3). Create resource managers with Flask-REST-JSONAPI
+4). Create URL endpoints and start the server with Flask
+
 
 ```
 
@@ -14,33 +22,38 @@ from flask_rest_jsonapi import ResourceRelationship
 
 ```
 
-1). First create a 'flask' application
+1). Define a database using Flask-SQLAlchemy
 
 ```
 
-# Create a new Flask application
-app = Flask(__name__)
+## 1). Create the SQL database
+def create_connection(db_file):
+    """ create a database connection to a SQLite database """
+    conn = None
+    try:
+        conn = sqlite3.connect(db_file)
+        print(sqlite3.version)
+    except Error as e:
+        print(e)
+    finally:
+        if conn:
+            conn.close()
 
-# Set up SQLAlchemy
+
+if __name__ == '__main__':
+    create_connection(r"D:\web_server_eg\data\artists.db")
+
+
+##  Set up SQLAlchemy
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////artists.db'
 db = SQLAlchemy(app)
 
-# Define a class for the Artist table
-class Artist(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    birth_year = db.Column(db.Integer)
-    genre = db.Column(db.String)
-
-# Create the table
-db.create_all()
-
 ```
 
-2). Second, create a data abstraction
+2). Create a data abstraction with Marshmallow-JSONAPI
 
 ```
-# Create data abstraction 
+## 2). Create data abstractions 
 class ArtistSchema(Schema):
     class Meta:
         type_ = 'artist'
@@ -69,12 +82,8 @@ class ArtworkSchema(Schema):
     id = fields.Integer()
     title = fields.Str(required=True)
     artist_id = fields.Integer(required=True)
-```
-
-3). Then create data layers
-
-```
-# Define the Artwork table
+    
+## Define the Artwork table
 class Artwork(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String)
@@ -82,9 +91,13 @@ class Artwork(db.Model):
         db.ForeignKey('artist.id'))
     artist = db.relationship('Artist',
         backref=db.backref('artworks'))
- 
-    
- # Create resource managers and endpoints   
+
+```
+
+3). Create resource managers with Flask-REST-JSONAPI
+
+```
+ ## Create resource managers and endpoints   
 class ArtworkMany(ResourceList):
     schema = ArtworkSchema
     data_layer = {'session': db.session,
@@ -108,14 +121,14 @@ class ArtistMany(ResourceList):
 class ArtistOne(ResourceDetail):
     schema = ArtistSchema
     data_layer = {'session': db.session,
-                  'model': Artist} 
+                  'model': Artist}  
 ```
 
-4). Then create endpoints 
+4). Finally, create the URL endpoints and start the server with Flask
 
 ```
 
-# Create endpoints    
+## 4). Create endpoints    
 api = Api(app)
 api.route(ArtistMany,    'artist_many',  '/artists')
 api.route(ArtistOne,     'artist_one',   '/artists/<int:id>')
@@ -123,6 +136,10 @@ api.route(ArtworkOne,    'artwork_one',  '/artworks/<int:id>')
 api.route(ArtworkMany,   'artwork_many', '/artworks')
 api.route(ArtistArtwork, 'artist_artworks',
     '/artists/<int:id>/relationships/artworks')
+    
+## main loop to run app in debug mode
+if __name__ == '__main__':
+    app.run(debug=True)
     
 ```
 
