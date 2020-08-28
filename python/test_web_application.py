@@ -5,7 +5,7 @@ Created on Fri Aug 28 14:06:37 2020
 @author: BurleyH
 """
 
-## Import Libraries
+## 1). Import Libraries
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow_jsonapi.flask import Schema
@@ -14,25 +14,25 @@ from flask_rest_jsonapi import Api, ResourceDetail, ResourceList
 from marshmallow_jsonapi.flask import Relationship
 from flask_rest_jsonapi import ResourceRelationship
 
-# Create a new Flask application
+## 2). Create a new Flask application
 app = Flask(__name__)
 
-# Set up SQLAlchemy
+## Set up SQLAlchemy
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////artists.db'
 db = SQLAlchemy(app)
 
-# Define a class for the Artist table
+## Define a class for the Artist table
 class Artist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     birth_year = db.Column(db.Integer)
     genre = db.Column(db.String)
 
-# Create the table
+## Create the table
 db.create_all()
 
 
-# Create data abstraction 
+## Create data abstraction 
 class ArtistSchema(Schema):
     class Meta:
         type_ = 'artist'
@@ -72,7 +72,7 @@ class Artwork(db.Model):
         backref=db.backref('artworks'))
  
     
- # Create resource managers and endpoints   
+ ## Create resource managers and endpoints   
 class ArtworkMany(ResourceList):
     schema = ArtworkSchema
     data_layer = {'session': db.session,
