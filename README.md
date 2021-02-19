@@ -1,4 +1,4 @@
-This puthon script creates an mock API that allows client-side interaction with an 
+This python script creates an mock API that allows client-side interaction with an 
 underlying database (adapted from https://www.freecodecamp.org/news/build-a-simple-json-api-in-python/).
 
 Here's an overview of the steps involved:
